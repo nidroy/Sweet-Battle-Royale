@@ -34,6 +34,16 @@ public class MenuManager : MonoBehaviourPunCallbacks
         PhotonNetwork.ConnectUsingSettings(); // Подключение к мастер-серверу Photon
     }
 
+    private void Update()
+    {
+        // Проверяем, загружается ли сцена
+        if (Globals.IsSceneLoading && !_loading.activeInHierarchy)
+        {
+            // Показываем экран загрузки
+            _lobbyManager.ShowLoadingScreen(_loading);
+        }
+    }
+
     /// <summary>
     /// Метод для нажатия кнопки управления музыкой
     /// </summary>
@@ -78,8 +88,22 @@ public class MenuManager : MonoBehaviourPunCallbacks
                 // Oбновляем список лобби
                 _lobbyManager.UpdateLobbyList(Globals.LobbyList);
                 Logger.Log(Logger.LogLevel.Info, "MenuManager", "Lobby list updated successfully.");
-                // Показать экран лобби, когда подключение успешно и список лобби успешно получен
-                ShowLobbyScreen();
+
+                // Проверяем, загружается ли сцена
+                if (Globals.IsSceneLoading)
+                {
+                    // Если сцена загружается, показываем экран лобби
+                    ShowLobbyScreen();
+                    // Устанавливаем флаг, что сцена больше не загружается
+                    Globals.IsSceneLoading = false;
+                    // Логируем успешное отображение экрана лобби
+                    Logger.Log(Logger.LogLevel.Info, "MenuManager", "Lobby screen shown, scene loading finished.");
+                }
+                else
+                {
+                    // Логируем, что невозможно показать экран лобби, так как сцена уже загружена
+                    Logger.Log(Logger.LogLevel.Info, "MenuManager", "Cannot show lobby screen, scene is already loaded.");
+                }
             }
             else
             {

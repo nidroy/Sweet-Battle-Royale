@@ -23,6 +23,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     public void CreateLobbyButton_Click()
     {
         CreateLobby(_lobbyName.text, 4);
+        LoadGameScene();
     }
 
     /// <summary>
@@ -31,6 +32,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     public void JoinLobbyButton_Click()
     {
         JoinLobby(_lobbyName.text);
+        LoadGameScene();
     }
 
     /// <summary>
@@ -57,6 +59,26 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         {
             LobbyItem lobbyItem = Instantiate(_lobbyPrefab, _lobbyListContent);
             lobbyItem.Init(_lobbyName, lobby.Name, lobby.PlayerCount, lobby.MaxPlayers);
+        }
+    }
+
+    /// <summary>
+    /// Метод для отображения экрана загрузки
+    /// </summary>
+    /// <param name="loading">Объект GameObject, представляющий экран загрузки</param>
+    public void ShowLoadingScreen(GameObject loading)
+    {
+        // Проверка, что объект загрузки не равен null
+        if (loading != null)
+        {
+            // Активируем экран загрузки
+            loading.SetActive(true);
+            Logger.Log(Logger.LogLevel.Info, "LobbyManager", "Loading screen shown.");
+        }
+        else
+        {
+            // Логируем сообщение об ошибке, если объект не был назначен в инспекторе
+            Logger.Log(Logger.LogLevel.Error, "LobbyManager", "Loading GameObject is not assigned in the inspector!");
         }
     }
 
@@ -90,6 +112,22 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     }
 
     /// <summary>
+    /// Метод для загрузки игровой сцены
+    /// </summary>
+    private void LoadGameScene()
+    {
+        // Проверяем, загружается ли сцена в данный момент
+        if (!Globals.IsSceneLoading)
+        {
+            // Устанавливаем флаг загрузки сцены в true
+            Globals.IsSceneLoading = true;
+
+            // Логируем начало процесса загрузки
+            Logger.Log(Logger.LogLevel.Info, "LobbyManager", "Loading GameScene...");
+        }
+    }
+
+    /// <summary>
     /// Callback при успешном создании лобби
     /// </summary>
     public override void OnCreatedRoom()
@@ -109,9 +147,10 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         // Сохраняем имя игрока
         Globals.PlayerName = _playerName.text;
 
-        // Переход на сцену GameScene
-        Logger.Log(Logger.LogLevel.Info, "LobbyManager", "Loading GameScene...");
-        PhotonNetwork.LoadLevel("GameScene"); // Загрузка сцены с именем "GameScene"
+        // Загрузка сцены с именем "GameScene"
+        PhotonNetwork.LoadLevel("GameScene");
+        // Логируем конец процесса загрузки
+        Logger.Log(Logger.LogLevel.Info, "LobbyManager", "GameScene is loaded.");
     }
 
     /// <summary>

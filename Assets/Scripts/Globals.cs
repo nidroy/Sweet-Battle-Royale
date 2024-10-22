@@ -4,6 +4,34 @@ using System.Collections.Generic;
 // Класс для хранения глобальных переменных и свойств
 public class Globals
 {
+    // Значение состояния загрузки сцены
+    private static bool _isSceneLoading = true;
+
+    // Свойство для доступа к состоянию загрузки сцены
+    public static bool IsSceneLoading
+    {
+        get
+        {
+            // Возвращаем текущее состояние загрузки сцены
+            return _isSceneLoading;
+        }
+        set
+        {
+            // Проверяем, изменилось ли состояние загрузки
+            if (_isSceneLoading != value)
+            {
+                // Устанавливаем новое значение состояния загрузки сцены
+                _isSceneLoading = value;
+            }
+            else
+            {
+                // Логирование попытки установить текущее значение
+                Logger.Log(Logger.LogLevel.Warning, "LobbyManager", "Attempted to set IsSceneLoading to its current value!");
+            }
+        }
+    }
+
+
     // Значение состояния музыки
     private static bool _isMusicMuted = true;
 

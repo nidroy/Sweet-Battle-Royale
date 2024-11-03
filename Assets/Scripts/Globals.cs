@@ -1,8 +1,8 @@
 using Photon.Realtime;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
-// Класс для хранения глобальных переменных и свойств
-public class Globals
+public static class Globals
 {
     // Значение состояния загрузки сцены
     private static bool _isSceneLoading = true;
@@ -10,109 +10,58 @@ public class Globals
     // Свойство для доступа к состоянию загрузки сцены
     public static bool IsSceneLoading
     {
-        get
-        {
-            // Возвращаем текущее состояние загрузки сцены
-            return _isSceneLoading;
-        }
-        set
-        {
-            // Проверяем, изменилось ли состояние загрузки
-            if (_isSceneLoading != value)
-            {
-                // Устанавливаем новое значение состояния загрузки сцены
-                _isSceneLoading = value;
-            }
-            else
-            {
-                // Логирование попытки установить текущее значение
-                Logger.Log(Logger.LogLevel.Warning, "LobbyManager", "Attempted to set IsSceneLoading to its current value!");
-            }
-        }
+        get => _isSceneLoading;
+        set => _isSceneLoading = value;
     }
 
+    // Коллекция для хранения информации обо всех доступных лобби
+    private static readonly List<RoomInfo> _lobbyList = new List<RoomInfo>();
 
-    // Значение состояния музыки
-    private static bool _isMusicMuted = true;
+    // Свойство для получения списка лобби в режиме только для чтения
+    public static ReadOnlyCollection<RoomInfo> LobbyList => _lobbyList.AsReadOnly();
 
-    // Свойство для доступа к состоянию музыки
-    public static bool IsMusicMuted
+    /// <summary>
+    /// Метод для обновления списка лобби.
+    /// </summary>
+    /// <param name="newLobbyList">Новый список лобби</param>
+    public static void UpdateLobbyList(IEnumerable<RoomInfo> newLobbyList)
     {
-        get
+        if (newLobbyList == null)
         {
-            // Возвращаем текущее состояние музыки
-            return _isMusicMuted;
+            LogError("The provided lobby list is null!");
+            return;
         }
-        set
-        {
-            // Проверка, изменилось ли состояние музыки
-            if (_isMusicMuted != value)
-            {
-                // Устанавливаем новое значение состояния музыки
-                _isMusicMuted = value;
-            }
-            else
-            {
-                // Логирование попытки установить текущее значение
-                Logger.Log(Logger.LogLevel.Warning, "Globals", "Attempted to set IsMusicMuted to its current value!");
-            }
-        }
+
+        _lobbyList.Clear();
+        _lobbyList.AddRange(newLobbyList);
     }
 
-    // Список существующих лобби
-    private static List<RoomInfo> _lobbyList = new List<RoomInfo>();
+    // Имя игрока
+    private static string _playerName = string.Empty;
 
-    // Свойство для доступа к списку лобби
-    public static List<RoomInfo> LobbyList
-    {
-        get
-        {
-            // Возвращаем текущий список лобби
-            return _lobbyList;
-        }
-        set
-        {
-            // Проверка, что переданный список не равен null
-            if (value != null)
-            {
-                // Очищаем список перед добавлением нового списка лобби
-                _lobbyList.Clear();
-
-                // Добавляем все элементы из переданного списка
-                _lobbyList.AddRange(value);
-            }
-            else
-            {
-                // Логирование ошибки, если передан null
-                Logger.Log(Logger.LogLevel.Error, "Globals", "The provided lobby list is null!");
-            }
-        }
-    }
-
-    // Значение имени игрока
-    private static string _playerName = "";
-
-    // Свойство для доступа к имени игрока
+    // Свойство для получения и установки имени игрока
     public static string PlayerName
     {
-        get
-        {
-            // Возвращаем текущее значение имени игрока
-            return _playerName;
-        }
+        get => _playerName;
         set
         {
-            // Проверка, что имя не является null или пустой строкой
-            if (!string.IsNullOrEmpty(value))
+            if (!string.IsNullOrWhiteSpace(value))
             {
-                // Устанавливаем новое значение для имени игрока
                 _playerName = value;
             }
             else
             {
-                // Логирование ошибки, если имя некорректное
-                Logger.Log(Logger.LogLevel.Error, "Globals", "Player name cannot be null or empty!");
+                LogError("Player name cannot be null or empty!");
             }
         }
+    }
+
+    /// <summary>
+    /// Метод для логирования ошибок.
+    /// </summary>
+    /// <param name="message">Сообщение для логирования</param>
+    private static void LogError(string message)
+    {
+        Logger.Log(Logger.LogLevel.Error, nameof(Globals), message);
     }
 }

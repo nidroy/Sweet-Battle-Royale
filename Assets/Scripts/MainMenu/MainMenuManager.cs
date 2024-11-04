@@ -10,6 +10,9 @@ public class MainMenuManager : MonoBehaviourPunCallbacks
     [SerializeField]
     private GameObject _lobbyObject; // Объект, отображающий меню лобби
 
+    [SerializeField]
+    private SettingsMenuManager _settingsMenuManager; // Ссылка на SettingsMenuManager
+
     // Свойство для доступа к объекту загрузки
     public GameObject LoadingObject
     {
@@ -26,11 +29,39 @@ public class MainMenuManager : MonoBehaviourPunCallbacks
 
     private void Start()
     {
+        _settingsMenuManager.Init(); // Инициализация настроек
         ShowScreen(LoadingObject, LobbyObject); // Показать экран загрузки при старте
         PhotonNetwork.ConnectUsingSettings(); // Подключение к мастер-серверу Photon
     }
 
     #region Публичные методы
+
+    /// <summary>
+    /// Обработчик нажатия кнопки для выхода из игры.
+    /// </summary>
+    public void OnQuitGameButtonClick()
+    {
+        LogInfo("Exiting game...");
+
+        // Отключение от сервера Photon, если подключен
+        if (PhotonNetwork.IsConnected)
+        {
+            PhotonNetwork.Disconnect();
+            LogInfo("Disconnected from Photon server.");
+        }
+        else
+        {
+            LogInfo("Photon server was not connected.");
+        }
+
+        // Завершение приложения
+        Application.Quit();
+
+#if UNITY_EDITOR
+        // Остановка игры в редакторе Unity
+        UnityEditor.EditorApplication.isPlaying = false;
+#endif
+    }
 
     /// <summary>
     /// Метод для показа или скрытия экранов.

@@ -1,6 +1,7 @@
 using System.IO;
 using System;
 using UnityEngine;
+using System.Text.RegularExpressions;
 
 public static class Settings
 {
@@ -10,6 +11,9 @@ public static class Settings
         "Sweet-Battle-Royale",
         "settings.json"
     );
+
+    // Регулярное выражение для проверки формата разрешения экрана
+    private static readonly Regex _resolutionRegex = new Regex(@"^(\d+)x(\d+)$", RegexOptions.Compiled);
 
     /// <summary>
     /// Класс для хранения данных настроек.
@@ -31,10 +35,14 @@ public static class Settings
         get => _currentSettings.ScreenResolution;
         set
         {
-            if (!string.IsNullOrWhiteSpace(value))
+            if (IsValidResolution(value))
+            {
                 _currentSettings.ScreenResolution = value;
+            }
             else
-                LogError("Screen resolution cannot be null or empty!");
+            {
+                LogError("Invalid screen resolution format! Expected format 'width x height'!");
+            }
         }
     }
 
@@ -53,9 +61,19 @@ public static class Settings
     }
 
     /// <summary>
+    /// Метод для проверки формата разрешения экрана.
+    /// </summary>
+    /// <param name="resolution">Строка разрешения экрана</param>
+    /// <returns>True, если формат разрешения корректен; иначе false.</returns>
+    private static bool IsValidResolution(string resolution)
+    {
+        return !string.IsNullOrWhiteSpace(resolution) && _resolutionRegex.IsMatch(resolution);
+    }
+
+    /// <summary>
     /// Метод для сохранения текущих настроек в файл JSON.
     /// </summary>
-    public static void SaveSettings()
+    public static void Save()
     {
         try
         {
@@ -69,14 +87,14 @@ public static class Settings
         }
         catch (Exception ex)
         {
-            LogError($"Failed to save settings: {ex.Message}");
+            LogError($"Failed to save settings: {ex.Message}!");
         }
     }
 
     /// <summary>
     /// Метод для загрузки настроек из файла JSON.
     /// </summary>
-    public static void LoadSettings()
+    public static void Load()
     {
         try
         {
@@ -92,13 +110,13 @@ public static class Settings
             {
                 // Установка значений по умолчанию и создание файла, если он отсутствует
                 SetDefaultSettings();
-                SaveSettings();
-                LogWarning("Settings file not found. Created a new one with default values.");
+                Save();
+                LogWarning("Settings file not found. Created a new one with default values!");
             }
         }
         catch (Exception ex)
         {
-            LogError($"Failed to load settings: {ex.Message}");
+            LogError($"Failed to load settings: {ex.Message}!");
         }
     }
 
@@ -110,6 +128,53 @@ public static class Settings
         // Создание нового экземпляра настроек со значениями по умолчанию
         _currentSettings = new SettingsData();
         LogInfo("Default settings applied.");
+    }
+
+    /// <summary>
+    /// Метод для применения разрешения экрана.
+    /// </summary>
+    public static void ApplyScreenResolution()
+    {
+        string[] dimensions = ScreenResolution.Split('x'); // Разделяем строку на ширину и высоту
+        int width = int.Parse(dimensions[0]); // Преобразуем ширину в целое число
+        int height = int.Parse(dimensions[1]); // Преобразуем высоту в целое число
+        Screen.SetResolution(width, height, Screen.fullScreen); // Устанавливаем новое разрешение экрана
+        LogInfo($"Screen resolution set to: {width}x{height}.");
+    }
+
+    /// <summary>
+    /// Метод для применения состояния полноэкранного режима.
+    /// </summary>
+    public static void ApplyFullScreen()
+    {
+        Screen.fullScreen = IsFullScreen; // Устанавливаем полноэкранный режим
+        LogInfo($"Fullscreen mode applied: {IsFullScreen}.");
+    }
+
+    /// <summary>
+    /// Метод для применения громкости музыки.
+    /// </summary>
+    /// <param name="musicSource">Источник звука для музыки</param>
+    public static void ApplyMusicVolume(AudioSource musicSource)
+    {
+        if (musicSource == null)
+        {
+            LogWarning("AudioSource for music is null. Cannot apply music volume!");
+            return;
+        }
+
+        float volume = GetNormalizedMusicVolume();
+        musicSource.volume = volume; // Устанавливаем громкость музыки
+        LogInfo($"Music volume applied: {MusicVolume} ({volume * 100}%).");
+    }
+
+    /// <summary>
+    /// Метод для получения нормализованного значение громкости музыки (0 - 1).
+    /// </summary>
+    /// <returns>Нормализованная громкость музыки</returns>
+    private static float GetNormalizedMusicVolume()
+    {
+        return Mathf.Clamp(MusicVolume / 100f, 0f, 1f); // Ограничиваем значение от 0 до 1
     }
 
     /// <summary>

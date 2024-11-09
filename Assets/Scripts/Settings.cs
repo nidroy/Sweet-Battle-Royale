@@ -24,6 +24,7 @@ public static class Settings
         public string ScreenResolution = "1920x1080";   // Разрешение экрана, по умолчанию 1920x1080
         public bool IsFullScreen = true;                // Значение состояния полноэкранного режима, по умолчанию включен
         public float MusicVolume = 100f;                // Громкость музыки от 0 до 100, по умолчанию 100
+        public bool IsFileLogging = true;               // Значение состояния записи логов в файл, по умолчанию включен
     }
 
     // Объект для хранения текущих значений настроек
@@ -58,6 +59,13 @@ public static class Settings
     {
         get => _currentSettings.MusicVolume;
         set => _currentSettings.MusicVolume = Mathf.Clamp(value, 0, 100);
+    }
+
+    // Свойство для доступа к состоянию записи логов в файл
+    public static bool IsFileLogging
+    {
+        get => _currentSettings.IsFileLogging;
+        set => _currentSettings.IsFileLogging = value;
     }
 
     /// <summary>
@@ -148,7 +156,7 @@ public static class Settings
     public static void ApplyFullScreen()
     {
         Screen.fullScreen = IsFullScreen; // Устанавливаем полноэкранный режим
-        LogInfo($"Fullscreen mode applied: {IsFullScreen}.");
+        LogInfo($"Full screen mode applied: {IsFullScreen}.");
     }
 
     /// <summary>
@@ -175,6 +183,22 @@ public static class Settings
     private static float GetNormalizedMusicVolume()
     {
         return Mathf.Clamp(MusicVolume / 100f, 0f, 1f); // Ограничиваем значение от 0 до 1
+    }
+
+    /// <summary>
+    /// Метод для применения состояния записи логов в файл.
+    /// </summary>
+    public static void ApplyFileLogging()
+    {
+        if (!IsFileLogging)
+        {
+            Logger.DeleteLogFile(); // Удаляем файл логов
+            LogInfo("File logging has been disabled. The log file has been deleted.");
+        }
+        else
+        {
+            LogInfo("File logging is enabled. Logs will now be saved to a file.");
+        }
     }
 
     /// <summary>

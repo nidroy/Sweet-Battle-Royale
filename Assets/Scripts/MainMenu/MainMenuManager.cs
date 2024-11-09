@@ -12,6 +12,8 @@ public class MainMenuManager : MonoBehaviourPunCallbacks
 
     [SerializeField]
     private SettingsMenuManager _settingsMenuManager; // Ссылка на SettingsMenuManager
+    [SerializeField]
+    private LobbyManager _lobbyManager; // Ссылка на LobbyManager
 
     // Свойство для доступа к объекту загрузки
     public GameObject LoadingObject
@@ -135,6 +137,8 @@ public class MainMenuManager : MonoBehaviourPunCallbacks
         Globals.UpdateLobbyList(roomList); // Обновляем список лобби
         LogInfo($"Found {Globals.LobbyList.Count} lobbies.");
         LogInfo("Lobby list updated successfully.");
+
+        _lobbyManager.UpdateLobbyList(Globals.LobbyList); // Обновляем отображение списка лобби
 
         if (Globals.IsSceneLoading)
         {

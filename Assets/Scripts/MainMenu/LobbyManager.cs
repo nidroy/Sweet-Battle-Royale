@@ -1,5 +1,6 @@
 using Photon.Pun;
 using Photon.Realtime;
+using System.Collections.ObjectModel;
 using TMPro;
 using UnityEngine;
 
@@ -40,6 +41,37 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         {
             JoinLobby(_lobbyNameInputField.text);
             LoadGameScene();
+        }
+    }
+
+    /// <summary>
+    /// Метод для обновления списка лобби в UI.
+    /// </summary>
+    /// <param name="lobbyList">Список доступных лобби</param>
+    public void UpdateLobbyList(ReadOnlyCollection<RoomInfo> lobbyList)
+    {
+        // Проверка на наличие лобби в списке. Если их нет, выводим предупреждение и выходим из метода.
+        if (lobbyList == null || lobbyList.Count == 0)
+        {
+            LogWarning("No lobbies to display!");
+            return;
+        }
+
+        // Удаляем старые элементы лобби, чтобы предотвратить дублирование в UI
+        foreach (Transform lobby in _lobbyListContent)
+        {
+            Destroy(lobby.gameObject);
+        }
+
+        // Создаем новые элементы лобби для каждого доступного лобби в списке
+        foreach (var lobby in lobbyList)
+        {
+            // Проверка на актуальность данных о лобби перед добавлением (например, если лобби закрыто, пропускаем его)
+            if (lobby.RemovedFromList) continue;
+
+            // Создаем новый элемент лобби и инициализируем его с актуальными данными
+            LobbyItem lobbyItem = Instantiate(_lobbyItemPrefab, _lobbyListContent);
+            lobbyItem.Init(_lobbyNameInputField, lobby.Name, lobby.PlayerCount, lobby.MaxPlayers);
         }
     }
 

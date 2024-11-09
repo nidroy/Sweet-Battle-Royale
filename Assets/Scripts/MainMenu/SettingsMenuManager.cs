@@ -10,13 +10,15 @@ public class SettingsMenuManager : MonoBehaviour
     [SerializeField]
     private TMP_Dropdown _screenResolutionDropdown; // Поле для выбора разрешения экрана
     [SerializeField]
-    private Toggle _fullScreenToggle; // Чекбокс для переключения полноэкранного режима
+    private Toggle _fullScreenToggle; // Чекбокс для переключения состояния полноэкранного режима
     [SerializeField]
     private Slider _musicVolumeSlider; // Слайдер для управления громкостью музыки
     [SerializeField]
     private TMP_Text _musicVolumeText; // Текстовое поле для отображения значения громкости музыки
     [SerializeField]
     private AudioSource _musicSource; // Источник звука для музыки
+    [SerializeField]
+    private Toggle _fileLoggingToggle; // Чекбокс для переключения состояния записи логов в файл
 
     // Структура для хранения разрешения экрана
     private struct ScreenResolution
@@ -63,8 +65,9 @@ public class SettingsMenuManager : MonoBehaviour
     {
         LoadSettings(); // Загрузка настроек из файла
         LoadScreeResolutionsToDropdown(); // Загрузка доступных разрешений экрана в выпадающий список
-        UpdateFullScreenToggle(); // Обновление состояния чекбокса
+        UpdateFullScreenToggle(); // Обновление состояния чекбокса полноэкранного режим
         UpdateMusicVolumeSlider(); // Обновление значения слайдера громкости музыки
+        UpdateFileLoggingToggle(); // Обновление состояния чекбокса записи логов в файл
         ApplySettings(); // Применение текущих настроек
         _settingsMenuObject.SetActive(true); // Отображение меню настроек
         LogInfo("Settings menu opened.");
@@ -92,7 +95,7 @@ public class SettingsMenuManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Обработчик изменения состояния чекбокса для переключения полноэкранного режима.
+    /// Обработчик изменения состояния чекбокса для переключения состояния полноэкранного режима.
     /// </summary>
     public void OnFullScreenToggleChanged()
     {
@@ -110,6 +113,16 @@ public class SettingsMenuManager : MonoBehaviour
         Settings.ApplyMusicVolume(_musicSource); // Применяем выбранную громкость музыки
         UpdateMusicVolumeText(); // Обновляем текстовое поле громкости
         LogInfo($"Music volume set to: {Settings.MusicVolume}.");
+    }
+
+    /// <summary>
+    /// Обработчик изменения состояния чекбокса для переключения состояния записи логов в файл.
+    /// </summary>
+    public void OnFileLoggingToggleChanged()
+    {
+        Settings.IsFileLogging = _fileLoggingToggle.isOn; // Сохраняем текущее состояние записи логов в настройках
+        Settings.ApplyFileLogging(); // Применяем состояние записи логов
+        LogInfo($"File logging set to: {Settings.IsFileLogging}.");
     }
 
     #endregion
@@ -142,6 +155,7 @@ public class SettingsMenuManager : MonoBehaviour
         Settings.ApplyScreenResolution(); // Применение разрешения экрана из настроек
         Settings.ApplyFullScreen(); // Применение состояния полноэкранного режима
         Settings.ApplyMusicVolume(_musicSource); // Применение громкости музыки
+        Settings.ApplyFileLogging(); // Применение состояния записи логов в файл
         LogInfo("Settings applied successfully.");
     }
 
@@ -217,6 +231,14 @@ public class SettingsMenuManager : MonoBehaviour
     private void UpdateMusicVolumeText()
     {
         _musicVolumeText.text = $"{Settings.MusicVolume.ToString("F0")}"; // Обновляем текст, показывая громкость в процентах
+    }
+
+    /// <summary>
+    /// Метод для обновления состояния чекбокса записи логов в файл.
+    /// </summary>
+    private void UpdateFileLoggingToggle()
+    {
+        _fileLoggingToggle.isOn = Settings.IsFileLogging; // Установка состояния чекбокса
     }
 
     /// <summary>

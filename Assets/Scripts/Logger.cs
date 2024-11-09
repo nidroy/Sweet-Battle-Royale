@@ -38,6 +38,7 @@ public class Logger
         string logMessage = $"{timestamp} [{logLevel}] {module}: {message}";
 
         // Выводим лог в консоль в зависимости от уровня логирования
+#if UNITY_EDITOR
         switch (logLevel)
         {
             case LogLevel.Info:
@@ -50,9 +51,42 @@ public class Logger
                 Debug.LogError(logMessage);   // Логирование ошибки
                 break;
         }
-
+#endif
         // Асинхронно сохраняем сообщение в файл
-        _ = SaveLogToFileAsync(logMessage);
+        if (Settings.IsFileLogging)
+        {
+            _ = SaveLogToFileAsync(logMessage);
+        }
+    }
+
+    /// <summary>
+    /// Метод для удаления файла логов
+    /// </summary>
+    public static void DeleteLogFile()
+    {
+        try
+        {
+            if (File.Exists(_logFilePath))
+            {
+                File.Delete(_logFilePath);
+#if UNITY_EDITOR
+                Debug.Log("Log file deleted successfully.");
+#endif
+            }
+            else
+            {
+#if UNITY_EDITOR
+                Debug.LogWarning("Log file does not exist!");
+#endif
+            }
+        }
+        catch (Exception ex)
+        {
+            // Логируем ошибку, если не удалось удалить файл
+#if UNITY_EDITOR
+            Debug.LogError($"Failed to delete log file: {ex.Message}!");
+#endif
+        }
     }
 
     /// <summary>
@@ -81,7 +115,9 @@ public class Logger
         catch (Exception ex)
         {
             // Логируем ошибку, если не удалось сохранить лог в файл
+#if UNITY_EDITOR
             Debug.LogError($"Failed to write log to file: {ex.Message}!");
+#endif
         }
     }
 }

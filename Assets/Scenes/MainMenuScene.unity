@@ -5597,7 +5597,7 @@ MonoBehaviour:
   _musicVolumeSlider: {fileID: 384471773}
   _musicVolumeText: {fileID: 1313072480}
   _musicSource: {fileID: 1538856005}
-  _fileLoggingToggle: {fileID: 0}
+  _fileLoggingToggle: {fileID: 1710821166}
 --- !u!1 &1357726901
 GameObject:
   m_ObjectHideFlags: 0

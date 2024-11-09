@@ -89,7 +89,7 @@ public class Logger
         }
     }
 
-    /// <summary>
+    // <summary>
     /// Асинхронный метод для сохранения логов в файл
     /// </summary>
     /// <param name="logMessage">Сообщение, которое нужно сохранить</param>
@@ -100,14 +100,25 @@ public class Logger
             // Создаем директорию, если она не существует
             Directory.CreateDirectory(Path.GetDirectoryName(_logFilePath));
 
-            // Проверяем размер файла логов; если превышен лимит, удаляем файл для очистки
-            if (new FileInfo(_logFilePath).Length > _maxLogFileSize)
+            // Если файл не существует, создаем его (если он есть, не делаем ничего)
+            if (!File.Exists(_logFilePath))
             {
-                File.Delete(_logFilePath);
+                // Можно использовать File.Create, но важно закрыть файл сразу
+                using (var fileStream = File.Create(_logFilePath)) { }
             }
 
-            // Открываем файл в режиме добавления и записываем лог, используя UTF-8 для кодировки
-            using (StreamWriter writer = new StreamWriter(_logFilePath, true, Encoding.UTF8))
+            // Проверка размера файла логов и его удаление, если превышен лимит
+            var fileInfo = new FileInfo(_logFilePath);
+            if (fileInfo.Length > _maxLogFileSize)
+            {
+                // Удаляем старый файл
+                File.Delete(_logFilePath);
+                // Немедленно создаем новый файл после удаления
+                using (var fileStream = File.Create(_logFilePath)) { }
+            }
+
+            // Асинхронно открываем файл для добавления сообщений в конец
+            using (var writer = new StreamWriter(_logFilePath, true, Encoding.UTF8))
             {
                 await writer.WriteLineAsync(logMessage); // Асинхронная запись строки в файл
             }
